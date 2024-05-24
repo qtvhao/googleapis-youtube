@@ -23,11 +23,6 @@ const youtube = google.youtube({
 });
 let authenticationSuccess = false;
 let TOKEN_PATH = process.env.TOKEN_PATH || 'token.json';
-if (fs.existsSync(TOKEN_PATH)) {
-    const tokens = fs.readFileSync(TOKEN_PATH);
-    oauth2Client.setCredentials(JSON.parse(tokens));
-    authenticationSuccess = true;
-}
 
 let express = require('express');
 let app = express();
@@ -55,10 +50,36 @@ app.get('/auth/google/callback', (req, res) => {
         res.sendStatus(400);
     }
 });
-app.listen(8080, () => {
-    console.log('Server is running on port 8080');
-});
-async function updateVideoTitle(videoId, newTitle) {
+if (fs.existsSync(TOKEN_PATH)) {
+    const tokens = fs.readFileSync(TOKEN_PATH);
+    oauth2Client.setCredentials(JSON.parse(tokens));
+    authenticationSuccess = true;
+}else{
+    app.listen(8080, () => {
+        console.log('Server is running on port 8080');
+    });
+}
+let Queue = require('bull');
+async function Processor(job) {
+    const videoId = 'R6-9K7BhWZc'; // Replace with your video ID
+    const newTitle = 'New Video Title'; // Replace with your new title
+
+    let listVideos = await youtube.videos.list({
+        part: 'snippet',
+        id: videoId,
+    });
+    let video = listVideos.data.items[0];
+    video.snippet.title = newTitle;
+    console.log('Updating video title:', video);
+    const response = await youtube.videos.update({
+        part: 'snippet',
+        requestBody: {
+            id: videoId,
+            snippet: video.snippet,
+        },
+    });
+}
+async function boot(videoId, newTitle) {
     const authUrl = oauth2Client.generateAuthUrl({
         access_type: 'offline',
         scope: ['https://www.googleapis.com/auth/youtube'],
@@ -73,25 +94,18 @@ async function updateVideoTitle(videoId, newTitle) {
         }
     }
     try {
-        const response = await youtube.videos.update({
-            part: 'snippet',
-            requestBody: {
-                id: videoId,
-                snippet: {
-                    title: newTitle,
-                    // You can include other properties like description, tags, etc.
-                },
-            },
-        });
-
+        if (process.env.QUEUE_NAME) {
+            var queue = new Queue(process.env.QUEUE_NAME);
+            queue.process(Processor);
+            queue.add(job);
+        }else{
+            let job = require('./draftJob.json');
+            await Processor(job);
+        }
         console.log('Video title updated successfully:', response.data);
     } catch (error) {
         console.error('Error updating video title:', error);
     }
 }
 
-// Example usage
-const videoId = 'R6-9K7BhWZc'; // Replace with your video ID
-const newTitle = 'New Video Title'; // Replace with your new title
-
-updateVideoTitle(videoId, newTitle);
+boot();
