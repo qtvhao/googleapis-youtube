@@ -2,6 +2,7 @@ version: '3.7'
 
 services:
   youtube:
+    stop_grace_period: 1s
     build:
       context: .
       dockerfile: Dockerfile
@@ -10,6 +11,7 @@ services:
     environment:
       - PORT=8080
       - CREDENTIALS_PATH=/var/secrets/google/credentials.json
+      - TOKEN_PATH=/var/secrets/google/token.json
     volumes:
       - ./secrets:/var/secrets/google
     secrets:
