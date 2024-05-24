@@ -1,0 +1,26 @@
+{
+  "name": "googleapis-youtube",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qtvhao/googleapis-youtube.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/qtvhao/googleapis-youtube/issues"
+  },
+  "homepage": "https://github.com/qtvhao/googleapis-youtube#readme",
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
+  "dependencies": {
+    "@googleapis/youtube": "^16.1.0",
+    "dotenv": "^16.4.5",
+    "google-auth-library": "*",
+    "googleapis": "^137.1.0"
+  }
+}
