@@ -52,8 +52,8 @@ app.get('/auth/google/callback', (req, res) => {
 });
 let Queue = require('bull');
 async function Processor(job) {
-    let videoId = job.returnValue || job.returnvalue;
     console.log('Processing job:', job);
+    let videoId = job.data.videoId;
     let article = job.data.article;
     const newTitle = article.titles[0]; // Replace with your new title
     let newTags = article.hashtags;
