@@ -50,26 +50,33 @@ app.get('/auth/google/callback', (req, res) => {
         res.sendStatus(400);
     }
 });
-if (fs.existsSync(TOKEN_PATH)) {
-    const tokens = fs.readFileSync(TOKEN_PATH);
-    oauth2Client.setCredentials(JSON.parse(tokens));
-    authenticationSuccess = true;
-}else{
-    app.listen(8080, () => {
-        console.log('Server is running on port 8080');
-    });
-}
 let Queue = require('bull');
 async function Processor(job) {
-    const videoId = 'R6-9K7BhWZc'; // Replace with your video ID
-    const newTitle = 'New Video Title'; // Replace with your new title
+    let videoId = job.returnValue || job.returnvalue;
+    console.log('Processing job:', job);
+    let article = job.data.article;
+    const newTitle = article.titles[0]; // Replace with your new title
+    let newTags = article.hashtags;
+    const newDescription = article.description + '\n\n' + article.hashtags.join(' ') + `
+
+Nhóm FB nơi các bạn đóng góp ý kiến, ủng hộ bài viết cho kênh, Ủng hộ vật chất, hoặc có nội dung hay muốn kênh biên tập video:
+https://www.facebook.com/groups/606853340648190
+Các bạn có thể ủng hộ cho kênh qua STK BIDV: 12110000949742. xin trân trọng cảm ơn
+Lưu ý: Chúng tôi không sở hữu tất cả tư liệu được sử dụng trong video này. Một số tư liệu được sử dụng trong video thuộc về các chủ sở hữu đáng kính.
+Mọi thắc mắc về bản quyền, tài trợ, quảng cáo, cộng tác vui lòng liên hệ email: qtvhao@gmail.com
+We do NOT own all the materials as well as footages used in this video. Please contact qtvhao@gmail.com for copyright matters!
+Cảm ơn các bạn đã theo dõi video. Hãy đăng ký kênh để theo dõi nhé`;
+    newTags = newTags.slice(0, 12);
 
     let listVideos = await youtube.videos.list({
         part: 'snippet',
         id: videoId,
     });
     let video = listVideos.data.items[0];
+    console.log('Video:', video);
     video.snippet.title = newTitle;
+    video.snippet.description = newDescription;
+    video.snippet.tags = newTags;
     console.log('Updating video title:', video);
     const response = await youtube.videos.update({
         part: 'snippet',
@@ -78,13 +85,26 @@ async function Processor(job) {
             snippet: video.snippet,
         },
     });
+    console.log('Updated video:', response.data);
 }
-async function boot(videoId, newTitle) {
-    const authUrl = oauth2Client.generateAuthUrl({
-        access_type: 'offline',
-        scope: ['https://www.googleapis.com/auth/youtube'],
-    });
+async function boot() {
+    if (fs.existsSync(TOKEN_PATH)) {
+        const tokens = JSON.parse(fs.readFileSync(TOKEN_PATH));
+        // check if the token is expired
+        if (tokens.expiry_date > new Date().getTime()) {
+            oauth2Client.setCredentials(tokens);
+            authenticationSuccess = true;
+        }
+    }
+    
     if (!authenticationSuccess) {
+        app.listen(8080, () => {
+            console.log('Server is running on port 8080');
+        });
+        const authUrl = oauth2Client.generateAuthUrl({
+            access_type: 'offline',
+            scope: ['https://www.googleapis.com/auth/youtube'],
+        });
         console.log('Please authorize this app by visiting this url:', authUrl);
     }
     while (true) {
@@ -95,14 +115,13 @@ async function boot(videoId, newTitle) {
     }
     try {
         if (process.env.QUEUE_NAME) {
-            var queue = new Queue(process.env.QUEUE_NAME);
+            const queue = new Queue(process.env.QUEUE_NAME);
             queue.process(Processor);
-            queue.add(job);
+            //queue.add(job);
         }else{
-            let job = require('./draftJob.json');
+            let job = JSON.parse(fs.readFileSync('/app/draftJob.json'));
             await Processor(job);
         }
-        console.log('Video title updated successfully:', response.data);
     } catch (error) {
         console.error('Error updating video title:', error);
     }
