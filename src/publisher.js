@@ -58,7 +58,7 @@ async function Processor(job) {
     console.log('Processing job:', job);
     let videoId = job.data.videoId;
     let article = job.data.article;
-    const newTitle = article.titles[0]; // Replace with your new title
+    const newTitle = article.title; // Replace with your new title
     let newTags = article.hashtags;
     const newDescription = article.description + '\n\n' + article.hashtags.join(' ') + `
 
