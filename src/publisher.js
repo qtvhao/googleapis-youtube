@@ -1,6 +1,9 @@
 // Load environment variables from .env file
 let fs = require('fs');
 require('dotenv').config();
+let password = process.env.REDIS_PASSWORD
+let redisHost = process.env.REDIS_HOST || 'redis'
+let redisPort = process.env.REDIS_PORT || 6379
 
 const { google } = require('googleapis');
 const OAuth2 = google.auth.OAuth2;
@@ -118,8 +121,15 @@ async function boot() {
     }
     try {
         if (process.env.QUEUE_NAME) {
+            let opts = {
+                redis: {
+                    port: redisPort,
+                    host: redisHost,
+                    password
+                }
+            };
             console.log('Processing jobs from queue:', process.env.QUEUE_NAME);
-            const queue = new Queue(process.env.QUEUE_NAME);
+            const queue = new Queue(process.env.QUEUE_NAME, opts);
             queue.process(Processor);
             //queue.add(job);
         }else{
