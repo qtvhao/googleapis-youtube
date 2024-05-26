@@ -88,6 +88,7 @@ Cảm ơn các bạn đã theo dõi video. Hãy đăng ký kênh để theo dõi
     console.log('Updated video:', response.data);
 }
 async function boot() {
+    console.log('Checking for authentication...');
     if (fs.existsSync(TOKEN_PATH)) {
         const tokens = JSON.parse(fs.readFileSync(TOKEN_PATH));
         // check if the token is expired
@@ -96,6 +97,7 @@ async function boot() {
             authenticationSuccess = true;
         }
     }
+    console.log('Authentication success:', authenticationSuccess);
     
     if (!authenticationSuccess) {
         app.listen(8080, () => {
@@ -108,6 +110,7 @@ async function boot() {
         console.log('Please authorize this app by visiting this url:', authUrl);
     }
     while (true) {
+        console.log('Waiting for authentication...');
         await new Promise(resolve => setTimeout(resolve, 1000));
         if (authenticationSuccess) {
             break;
@@ -115,6 +118,7 @@ async function boot() {
     }
     try {
         if (process.env.QUEUE_NAME) {
+            console.log('Processing jobs from queue:', process.env.QUEUE_NAME);
             const queue = new Queue(process.env.QUEUE_NAME);
             queue.process(Processor);
             //queue.add(job);
