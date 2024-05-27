@@ -117,6 +117,8 @@ Cảm ơn các bạn đã theo dõi video. Hãy đăng ký kênh để theo dõi
     video.snippet.description = newDescription;
     video.snippet.tags = newTags;
     console.log('Updating video title:', video);
+    // The request metadata specifies an invalid or empty video title.
+    job.log('Updating snippet: ' + JSON.stringify(video.snippet));
     const response = await youtube.videos.update({
         part: 'snippet',
         requestBody: {
