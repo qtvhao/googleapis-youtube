@@ -114,8 +114,17 @@ Cảm ơn các bạn đã theo dõi video. Hãy đăng ký kênh để theo dõi
     let video = listVideos.data.items[0];
     console.log('Video:', video);
     video.snippet.title = newTitle;
+    if (video.snippet.title.length > 99) {
+        // elipsis is 3 characters
+        video.snippet.title = video.snippet.title.substring(0, 96) + '...';
+    }
     video.snippet.description = newDescription;
     video.snippet.tags = newTags;
+    while(video.snippet.tags.join(',').length > 499) {
+        let pop = video.snippet.tags.pop();
+        console.log('Popping tag:', pop);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+    }
     console.log('Updating video title:', video);
     // The request metadata specifies an invalid or empty video title.
     job.log('Updating snippet: ' + JSON.stringify(video.snippet));
