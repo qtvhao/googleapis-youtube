@@ -29,6 +29,13 @@ let TOKEN_PATH = process.env.TOKEN_PATH || 'token.json';
 
 let express = require('express');
 let app = express();
+oauth2Client.on('tokens', (tokens) => {
+    if (tokens.refresh_token) {
+        // store the refresh_token in your secure persistent database
+        console.log(tokens.refresh_token);
+    }
+    console.log(tokens.access_token);
+});
 app.get('/auth/google/callback', (req, res) => {
     const code = req.query.code;
     if (code) {
@@ -37,6 +44,13 @@ app.get('/auth/google/callback', (req, res) => {
                 console.error('Error authenticating', err);
                 return res.sendStatus(500);
             }
+            if (tokens.refresh_token) {
+                // store the refresh_token in your secure persistent database
+                console.log(tokens.refresh_token);
+            } else {
+                throw new Error('No refresh token is set. We need to authenticate the user.');
+            }
+            console.log(tokens.access_token);
 
             /**
                 * Set the value to 'offline' if your application needs to refresh access tokens when the user
@@ -45,6 +59,7 @@ app.get('/auth/google/callback', (req, res) => {
             let expiry_seconds = tokens.expiry_date - Math.floor(Date.now() / 1000);
             console.log('Expires In: ' + expiry_seconds + 's');
 
+            console.log('Tokens:', tokens);
             oauth2Client.setCredentials(tokens);
             fs.writeFile(TOKEN_PATH, JSON.stringify(tokens), (err) => {
                 if (err) {
