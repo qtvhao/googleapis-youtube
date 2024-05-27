@@ -36,6 +36,7 @@ oauth2Client.on('tokens', (tokens) => {
     }
     console.log(tokens.access_token);
 });
+
 app.get('/auth/google/callback', (req, res) => {
     const code = req.query.code;
     if (code) {
@@ -48,7 +49,7 @@ app.get('/auth/google/callback', (req, res) => {
                 * Set the value to 'offline' if your application needs to refresh access tokens when the user
                 * is not present at the browser.
              */
-            let expiry_seconds = tokens.expiry_date - Math.floor(Date.now() / 1000);
+            let expiry_seconds = tokens.expiry_date - Math.floor(Date.now());
             console.log('Expires In: ' + expiry_seconds + 's');
 
             console.log('Tokens:', tokens);
