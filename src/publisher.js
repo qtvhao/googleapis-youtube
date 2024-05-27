@@ -54,6 +54,10 @@ app.get('/auth/google/callback', (req, res) => {
     }
 });
 let Queue = require('bull');
+async function authentication() {
+    // No refresh token is set. We need to authenticate the user.
+    console.log('No refresh token is set. We need to authenticate the user.');
+}
 async function Processor(job) {
     console.log('Processing job:', job);
     let videoId = job.data.videoId;
@@ -71,10 +75,19 @@ We do NOT own all the materials as well as footages used in this video. Please c
 Cảm ơn các bạn đã theo dõi video. Hãy đăng ký kênh để theo dõi nhé`;
     newTags = newTags.slice(0, 12);
 
-    let listVideos = await youtube.videos.list({
-        part: 'snippet',
-        id: videoId,
-    });
+    let listVideos;
+    try {
+        listVideos = await youtube.videos.list({
+            part: 'snippet',
+            id: videoId,
+        });
+    }catch(e) {
+        // No refresh token is set. We need to authenticate the user.
+        console.error('Error listing videos:', e);
+        await authentication();
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        throw e;
+    }
     let video = listVideos.data.items[0];
     console.log('Video:', video);
     video.snippet.title = newTitle;
@@ -95,10 +108,10 @@ async function boot() {
     if (fs.existsSync(TOKEN_PATH)) {
         const tokens = JSON.parse(fs.readFileSync(TOKEN_PATH));
         // check if the token is expired
-        if (tokens.expiry_date > new Date().getTime()) {
-            oauth2Client.setCredentials(tokens);
-            authenticationSuccess = true;
-        }
+        oauth2Client.setCredentials(tokens);
+        authenticationSuccess = true;
+/*     if (tokens.expiry_date > new Date().getTime()) {
+        } */
     }
     console.log('Authentication success:', authenticationSuccess);
     
