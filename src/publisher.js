@@ -146,6 +146,8 @@ async function boot() {
         });
         const authUrl = oauth2Client.generateAuthUrl({
             access_type: 'offline',
+            // prompt=consent
+            prompt: 'consent',
             include_granted_scopes: true,
             scope: ['https://www.googleapis.com/auth/youtube'],
         });
