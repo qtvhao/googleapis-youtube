@@ -38,6 +38,13 @@ app.get('/auth/google/callback', (req, res) => {
                 return res.sendStatus(500);
             }
 
+            /**
+                * Set the value to 'offline' if your application needs to refresh access tokens when the user
+                * is not present at the browser.
+             */
+            let expiry_seconds = tokens.expiry_date - Math.floor(Date.now() / 1000);
+            console.log('Expires In: ' + expiry_seconds + 's');
+
             oauth2Client.setCredentials(tokens);
             fs.writeFile(TOKEN_PATH, JSON.stringify(tokens), (err) => {
                 if (err) {
@@ -81,7 +88,7 @@ Cảm ơn các bạn đã theo dõi video. Hãy đăng ký kênh để theo dõi
             part: 'snippet',
             id: videoId,
         });
-    }catch(e) {
+    } catch (e) {
         // No refresh token is set. We need to authenticate the user.
         console.error('Error listing videos:', e);
         await authentication();
@@ -106,15 +113,17 @@ Cảm ơn các bạn đã theo dõi video. Hãy đăng ký kênh để theo dõi
 async function boot() {
     console.log('Checking for authentication...');
     if (fs.existsSync(TOKEN_PATH)) {
+        console.log('Token file exists');
         const tokens = JSON.parse(fs.readFileSync(TOKEN_PATH));
         // check if the token is expired
-        oauth2Client.setCredentials(tokens);
+        console.log('Token is:', tokens);
+        oauth2Client.setCredentials({
+            refresh_token: tokens.refresh_token,
+        });
         authenticationSuccess = true;
-/*     if (tokens.expiry_date > new Date().getTime()) {
-        } */
     }
-    console.log('Authentication success:', authenticationSuccess);
-    
+    console.log(authenticationSuccess ? 'Authenticated' : 'Not authenticated');
+
     if (!authenticationSuccess) {
         app.listen(8080, () => {
             console.log('Server is running on port 8080');
@@ -145,7 +154,7 @@ async function boot() {
             const queue = new Queue(process.env.QUEUE_NAME, opts);
             queue.process(Processor);
             //queue.add(job);
-        }else{
+        } else {
             let job = JSON.parse(fs.readFileSync('/app/draftJob.json'));
             await Processor(job);
         }
