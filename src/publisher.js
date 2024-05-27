@@ -44,14 +44,6 @@ app.get('/auth/google/callback', (req, res) => {
                 console.error('Error authenticating', err);
                 return res.sendStatus(500);
             }
-            if (tokens.refresh_token) {
-                // store the refresh_token in your secure persistent database
-                console.log(tokens.refresh_token);
-            } else {
-                throw new Error('No refresh token is set. We need to authenticate the user.');
-            }
-            console.log(tokens.access_token);
-
             /**
                 * Set the value to 'offline' if your application needs to refresh access tokens when the user
                 * is not present at the browser.
@@ -60,6 +52,14 @@ app.get('/auth/google/callback', (req, res) => {
             console.log('Expires In: ' + expiry_seconds + 's');
 
             console.log('Tokens:', tokens);
+            if (tokens.refresh_token) {
+                // store the refresh_token in your secure persistent database
+                console.log(tokens.refresh_token);
+            } else {
+                throw new Error('No refresh token is set. We need to authenticate the user.');
+            }
+            console.log(tokens.access_token);
+
             oauth2Client.setCredentials(tokens);
             fs.writeFile(TOKEN_PATH, JSON.stringify(tokens), (err) => {
                 if (err) {
@@ -145,6 +145,7 @@ async function boot() {
         });
         const authUrl = oauth2Client.generateAuthUrl({
             access_type: 'offline',
+            include_granted_scopes: true,
             scope: ['https://www.googleapis.com/auth/youtube'],
         });
         console.log('Please authorize this app by visiting this url:', authUrl);
