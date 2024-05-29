@@ -182,7 +182,18 @@ async function boot() {
             };
             console.log('Processing jobs from queue:', process.env.QUEUE_NAME);
             const queue = new Queue(process.env.QUEUE_NAME, opts);
-            queue.process(Processor);
+            youtube.videos.list({
+                part: 'snippet',
+                id: videoId,
+            }).then(() => {
+                console.log('Connected to youtube: ' + videoId);
+                queue.process(Processor);
+            }).catch((e) => {
+                console.error('Error listing videos:', e);
+                // No refresh token is set. We need to authenticate the user.
+                authentication();
+                process.exit(1);
+            });
             //queue.add(job);
         } else {
             let job = JSON.parse(fs.readFileSync('/app/draftJob.json'));
