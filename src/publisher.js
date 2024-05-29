@@ -184,9 +184,9 @@ async function boot() {
             const queue = new Queue(process.env.QUEUE_NAME, opts);
             youtube.videos.list({
                 part: 'snippet',
-                id: videoId,
+                id: 'D5zTsC_89v8',
             }).then(() => {
-                console.log('Connected to youtube: ' + videoId);
+                console.log('Connected to youtube: ' + 'D5zTsC_89v8');
                 queue.process(Processor);
             }).catch((e) => {
                 console.error('Error listing videos:', e);
