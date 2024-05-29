@@ -9,9 +9,9 @@ const { google } = require('googleapis');
 const OAuth2 = google.auth.OAuth2;
 let credentials = require(process.env.CREDENTIALS_PATH);
 // Replace with your own credentials
-const CLIENT_ID = credentials.installed.client_id;
-const CLIENT_SECRET = credentials.installed.client_secret;
-const REDIRECT_URI = credentials.installed.redirect_uris[0];
+const CLIENT_ID = credentials.web.client_id;
+const CLIENT_SECRET = credentials.web.client_secret;
+const REDIRECT_URI = credentials.web.redirect_uris[0];
 // or your redirect URI
 // const REFRESH_TOKEN = process.env.REFRESH_TOKEN; // Ideally obtained after initial OAuth 2.0 flow
 
