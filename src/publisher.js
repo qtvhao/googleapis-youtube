@@ -209,6 +209,7 @@ async function boot() {
                 part: 'snippet',
                 id: 'D5zTsC_89v8',
             }).then(() => {
+                app.use(express.json());
                 app.post('/check-uploaded-video', async (req, res) => {
                     console.log('Checking uploaded video:', req.body);
                     let articleName = req.body.articleName;
