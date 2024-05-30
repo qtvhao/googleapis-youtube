@@ -87,7 +87,11 @@ async function Processor(job) {
     let article = job.data.article;
     const newTitle = article.title; // Replace with your new title
     let newTags = article.hashtags;
-    const newDescription = article.description + '\n\n' + article.hashtags.join(' ') + `
+    let description = article.description;
+    try {
+        description = JSON.parse(description);
+    }catch(e) {}
+    const newDescription = description + '\n\n' + `Bạn có thể tìm hiểu thêm thông tin về chủ đề này bằng từ khóa ${article.name}.` + '\n\n' + article.hashtags.join(' ') + `
 
 Nhóm FB nơi các bạn đóng góp ý kiến, ủng hộ bài viết cho kênh, Ủng hộ vật chất, hoặc có nội dung hay muốn kênh biên tập video:
 https://www.facebook.com/groups/606853340648190
