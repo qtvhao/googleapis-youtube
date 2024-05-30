@@ -169,6 +169,7 @@ async function searchVideos(articleName, pageToken) {
     });
     if (!filteredVideo && nextPageToken) {
         console.log("Searching next page...");
+        await new Promise(resolve => setTimeout(resolve, 1000));
         return searchVideos(articleName, nextPageToken);
     }
     console.log("Searched, found video: ", filteredVideo)
