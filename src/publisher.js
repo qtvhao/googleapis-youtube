@@ -140,6 +140,9 @@ Cảm ơn các bạn đã theo dõi video. Hãy đăng ký kênh để theo dõi
         },
     });
     console.log('Updated video:', response.data);
+    fs.writeFileSync('/videos/' + article.name + '.lock', 'done');
+
+    return response.data;
 }
 
 // Search for videos
