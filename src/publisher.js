@@ -165,7 +165,7 @@ async function searchVideos(articleName, pageToken) {
     let matcher = `Bạn có thể tìm hiểu thêm thông tin về chủ đề này bằng từ khóa ${articleName}.`;
     console.log("Matcher: ", matcher);
     let filteredVideo = res.data.items.find((video) => {
-        return video.snippet.description.includes(matcher);
+        return video.snippet && video.snippet.description.includes(matcher);
     });
     if (!filteredVideo && nextPageToken) {
         console.log("Searching next page...");
