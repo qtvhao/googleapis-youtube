@@ -161,7 +161,7 @@ async function searchVideos(articleName, pageToken) {
     let nextPageToken = res.data.nextPageToken;
     console.log("Next page token: ", nextPageToken);
     //
-    console.log(res.data.items); // Print the found videos
+    // console.log(res.data.items); // Print the found videos
     let matcher = `Bạn có thể tìm hiểu thêm thông tin về chủ đề này bằng từ khóa ${articleName}.`;
     console.log("Matcher: ", matcher);
     let filteredVideo = res.data.items.find((video) => {
