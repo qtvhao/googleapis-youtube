@@ -143,20 +143,34 @@ Cảm ơn các bạn đã theo dõi video. Hãy đăng ký kênh để theo dõi
 }
 
 // Search for videos
-async function searchVideos(articleName) {
+async function searchVideos(articleName, pageToken) {
     const res = await youtube.search.list({
         // auth,
         part: 'snippet',
         forMine: true, // Search only your uploaded videos
         // q: 'Connected', // Search for videos with "Connected" in the description
         type: 'video',
+        maxResults: 50,
+        pageToken: pageToken,
     });
+/*     let pageInfo = res.data.pageInfo;
+    let totalResults = pageInfo.totalResults;
+    console.log("Total results: ", totalResults);
+    let resultsPerPage = pageInfo.resultsPerPage;
+    console.log("Results per page: ", resultsPerPage); */
+    let nextPageToken = res.data.nextPageToken;
+    console.log("Next page token: ", nextPageToken);
+    //
     console.log(res.data.items); // Print the found videos
     let matcher = `Bạn có thể tìm hiểu thêm thông tin về chủ đề này bằng từ khóa ${articleName}.`;
     console.log("Matcher: ", matcher);
     let filteredVideo = res.data.items.find((video) => {
         return video.snippet.description.includes(matcher);
     });
+    if (!filteredVideo && nextPageToken) {
+        console.log("Searching next page...");
+        return searchVideos(articleName, nextPageToken);
+    }
     console.log("Searched, found video: ", filteredVideo)
 
     return filteredVideo;
