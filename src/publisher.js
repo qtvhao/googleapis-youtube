@@ -90,7 +90,7 @@ async function Processor(job) {
     let description = article.description;
     try {
         description = JSON.parse(description);
-    }catch(e) {}
+    } catch (e) { }
     const newDescription = description + '\n\n' + `Bạn có thể tìm hiểu thêm thông tin về chủ đề này bằng từ khóa ${article.name}.` + '\n\n' + article.hashtags.join(' ') + `
 
 Nhóm FB nơi các bạn đóng góp ý kiến, ủng hộ bài viết cho kênh, Ủng hộ vật chất, hoặc có nội dung hay muốn kênh biên tập video:
@@ -124,7 +124,7 @@ Cảm ơn các bạn đã theo dõi video. Hãy đăng ký kênh để theo dõi
     }
     video.snippet.description = newDescription;
     video.snippet.tags = newTags;
-    while(video.snippet.tags.join(',').length > 499) {
+    while (video.snippet.tags.join(',').length > 499) {
         let pop = video.snippet.tags.pop();
         console.log('Popping tag:', pop);
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -140,6 +140,25 @@ Cảm ơn các bạn đã theo dõi video. Hãy đăng ký kênh để theo dõi
         },
     });
     console.log('Updated video:', response.data);
+}
+
+// Search for videos
+async function searchVideos(articleName) {
+    const youtube = google.youtube('v3');
+    const res = await youtube.search.list({
+        // auth,
+        part: 'snippet',
+        forMine: true, // Search only your uploaded videos
+        // q: 'Connected', // Search for videos with "Connected" in the description
+        type: 'video',
+    });
+    console.log(res.data.items); // Print the found videos
+    let matcher = `Bạn có thể tìm hiểu thêm thông tin về chủ đề này bằng từ khóa ${articleName}.`;
+    let filteredVideo = res.data.items.find((video) => {
+        return video.snippet.description.includes(matcher);
+    });
+
+    return filteredVideo;
 }
 async function boot() {
     console.log('Checking for authentication...');
@@ -190,7 +209,23 @@ async function boot() {
                 part: 'snippet',
                 id: 'D5zTsC_89v8',
             }).then(() => {
+                app.post('/check-uploaded-video', async (req, res) => {
+                    console.log('Checking uploaded video:', req.body);
+                    let articleName = req.body.articleName;
+                    //
+                    let filteredVideo = await searchVideos(articleName);
+
+                    let isVideoUploaded = typeof filteredVideo !== 'undefined' && filteredVideo !== null;
+
+                    res.send({
+                        isVideoUploaded,
+                        videoId: filteredVideo.id,
+                    });
+                });
                 console.log('Connected to youtube: ' + 'D5zTsC_89v8');
+                app.listen(8080, () => {
+                    console.log('Server is running on port 8080');
+                });
                 queue.process(Processor);
             }).catch((e) => {
                 console.error('Error listing videos:', e);
