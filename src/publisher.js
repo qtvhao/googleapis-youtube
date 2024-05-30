@@ -140,13 +140,25 @@ Cảm ơn các bạn đã theo dõi video. Hãy đăng ký kênh để theo dõi
         },
     });
     console.log('Updated video:', response.data);
-    fs.writeFileSync('/videos/' + article.name + '.lock', 'done');
+    fs.writeFileSync('/videos/' + article.name + '.lock', JSON.stringify(response.data));
 
     return response.data;
 }
 
 // Search for videos
 async function searchVideos(articleName, pageToken) {
+    let lockFile = '/videos/' + articleName + '.lock'
+
+    if (fs.existsSync(lockFile)) {
+        console.log('Video already uploaded');
+        return {
+            isVideoUploaded: true,
+            videoId: JSON.parse(fs.readFileSync(lockFile)),
+        };
+    }else {
+        console.log('Video not uploaded');
+        return null;
+    }
     const res = await youtube.search.list({
         // auth,
         part: 'snippet',
