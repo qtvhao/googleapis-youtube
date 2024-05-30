@@ -219,7 +219,7 @@ async function boot() {
 
                     res.send({
                         isVideoUploaded,
-                        videoId: filteredVideo.id,
+                        videoId: filteredVideo?.id,
                     });
                 });
                 console.log('Connected to youtube: ' + 'D5zTsC_89v8');
