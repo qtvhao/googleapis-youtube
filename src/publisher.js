@@ -144,7 +144,6 @@ Cảm ơn các bạn đã theo dõi video. Hãy đăng ký kênh để theo dõi
 
 // Search for videos
 async function searchVideos(articleName) {
-    const youtube = google.youtube('v3');
     const res = await youtube.search.list({
         // auth,
         part: 'snippet',
