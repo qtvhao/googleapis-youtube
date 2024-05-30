@@ -236,35 +236,35 @@ async function boot() {
             };
             console.log('Processing jobs from queue:', process.env.QUEUE_NAME);
             const queue = new Queue(process.env.QUEUE_NAME, opts);
-            youtube.videos.list({
+            app.use(express.json());
+            app.post('/check-uploaded-video', async (req, res) => {
+                console.log('Checking uploaded video:', req.body);
+                let articleName = req.body.articleName;
+                //
+                let filteredVideo = await searchVideos(articleName);
+
+                let isVideoUploaded = typeof filteredVideo !== 'undefined' && filteredVideo !== null;
+
+                res.send({
+                    isVideoUploaded,
+                    videoId: filteredVideo?.id,
+                });
+            });
+            // console.log('Connected to youtube: ' + 'D5zTsC_89v8');
+            app.listen(8080, () => {
+                console.log('Server is running on port 8080');
+            });
+            queue.process(Processor);
+/*             youtube.videos.list({
                 part: 'snippet',
                 id: 'D5zTsC_89v8',
             }).then(() => {
-                app.use(express.json());
-                app.post('/check-uploaded-video', async (req, res) => {
-                    console.log('Checking uploaded video:', req.body);
-                    let articleName = req.body.articleName;
-                    //
-                    let filteredVideo = await searchVideos(articleName);
-
-                    let isVideoUploaded = typeof filteredVideo !== 'undefined' && filteredVideo !== null;
-
-                    res.send({
-                        isVideoUploaded,
-                        videoId: filteredVideo?.id,
-                    });
-                });
-                console.log('Connected to youtube: ' + 'D5zTsC_89v8');
-                app.listen(8080, () => {
-                    console.log('Server is running on port 8080');
-                });
-                queue.process(Processor);
             }).catch((e) => {
                 console.error('Error listing videos:', e);
                 // No refresh token is set. We need to authenticate the user.
                 authentication();
                 process.exit(1);
-            });
+            }); */
             //queue.add(job);
         } else {
             let job = JSON.parse(fs.readFileSync('/app/draftJob.json'));
