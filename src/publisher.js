@@ -1,6 +1,6 @@
 // Load environment variables from .env file
 let fs = require('fs');
-require('dotenv').config();
+// require('dotenv').config();
 let password = process.env.REDIS_PASSWORD
 let redisHost = process.env.REDIS_HOST || 'redis'
 let redisPort = process.env.REDIS_PORT || 6379
